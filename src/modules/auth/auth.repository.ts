@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "../../db/index.js";
 import { users } from "../../db/schema/users.js";
+import { refreshTokens } from "../../db/schema/refresh-tokens.js";
 
 
 export const findByEmail = async (
@@ -54,3 +55,25 @@ export const incrementTokenVersion = async (userId: number) => {
         .where(eq(users.id, userId));
 };
 
+export const createRefreshToken = async (userId: number, token: string, expiresAt: Date) => {
+    const res = await db.insert(refreshTokens)
+        .values({
+            userId,
+            token,
+            expiresAt,
+        });
+    
+    console.log(res)
+};
+
+
+export const findRefreshToken = async (token: string) => {
+    const result = await db.select().from(refreshTokens).where(eq(refreshTokens.token, token));
+    
+    return result[0] ?? null;
+}
+
+export const deleteRefreshToken = async (token: string) => {
+    await db.delete(refreshTokens).where(eq(refreshTokens.token, token));
+    
+}

@@ -1,9 +1,10 @@
-import type { RegisterInput, LoginInput } from './auth.types.js';
+import type { RegisterInput, LoginInput, RefreshTokenInput, LogoutInput } from './auth.types.js';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import * as authRepository from './auth.repository.js';
 import { AppError } from '../../shared/errors/app-error.js';
-import { createAccessToken } from '../../shared/services/jwt.service.js';
+import { createAccessToken, createRefreshToken } from '../../shared/services/jwt.service.js';
+import { verifyRefreshToken } from '../../shared/services/jwt.service.js';
+import { success } from 'zod';
 
 export const register = async (
  data: RegisterInput
@@ -51,14 +52,15 @@ export const login = async (data: LoginInput) => {
         tokenVersion: user.tokenVersion,
     });
 
-    const refreshToken = jwt.sign(
-        {
-            userId: user.id,
-        },
-        process.env.JWT_SECRET!,
-        {
-            expiresIn: '17d'
-        }
+    const refreshToken = createRefreshToken({
+        userId: user.id,
+        tokenVersion: user.tokenVersion,
+    })
+
+    await authRepository.createRefreshToken(
+        user.id,
+        refreshToken,
+        new Date(Date.now() + 17 * 24 * 60 * 60 * 1000) // 17 days
     );
 
     return {
@@ -70,4 +72,45 @@ export const login = async (data: LoginInput) => {
 
 export const logoutAll = async (userId: number) => {
     await authRepository.incrementTokenVersion(userId);
+}
+
+export const refreshAccessToken = async (refreshToken: RefreshTokenInput) => {
+    const payload = verifyRefreshToken(refreshToken.refreshToken);
+
+    const session = await authRepository.findRefreshToken(refreshToken.refreshToken);
+
+    if (!session) {
+        throw new AppError("Invalid refresh token", 401);
+    }
+
+    const user = await authRepository.getById(payload.userId);
+
+    if (!user) {
+        throw new AppError("Invalid refresh token", 404);
+    }
+
+    if (user.tokenVersion !== payload.tokenVersion) {
+        throw new AppError("Expired session", 401);
+    }
+
+    const newAccessToken = createAccessToken({
+        userId: user.id,
+        tokenVersion: user.tokenVersion,
+    });
+
+    return {
+        success: true,
+        token: newAccessToken,
+    };
+}
+
+
+export const logout = async (
+    data: LogoutInput
+) => {
+    await authRepository.deleteRefreshToken(data.refreshToken);
+
+    return {
+        success: true
+    }
 }

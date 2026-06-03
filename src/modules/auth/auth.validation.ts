@@ -17,3 +17,12 @@ export const loginSchema = z.object({
     email: z.string().email(),
     password: z.string().min(1).max(255)
 }).strict()
+
+
+export const refreshTokenSchema = z.object({
+    refreshToken: z.string().min(1),
+}).strict()
+
+export const logoutSchema = z.object({
+    refreshToken: z.string().min(1),
+}).strict()

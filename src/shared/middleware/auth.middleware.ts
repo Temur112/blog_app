@@ -36,11 +36,17 @@ export const authenticate = async (
         return next(new AppError("Unauthorized", 401));
     }
 
-    (req as any).user = {
+    // (req as any).user = {
+    //     id: user.id,
+    //     email: user.email,
+    //     username: user.username,
+    // };
+
+    req.user = {
         id: user.id,
         email: user.email,
-        username: user.username,
-    };
+        username: user.username
+    }
 
     // console.log("Authenticated user with payload:", payload);
 
