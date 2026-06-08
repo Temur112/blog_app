@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import { getAuthenticatedUser } from "../../shared/utils/auth.js";
 import * as postService from "./post.service.js";
 import { asyncHandler } from "../../shared/utils/async-handler.js";
+import type { GetPostQuerySchema } from "./post.types.js";
+import { getPostQuerySchema } from "./post.validation.js";
  
 
 
@@ -19,12 +21,13 @@ export const createPost = asyncHandler(
 )
 
 
-export const getPosts = async () => asyncHandler (
+export const getPosts = asyncHandler (
     async (
         req: Request,
         res: Response
     ) => {
-        const posts = await postService.getPosts();
+        const query = getPostQuerySchema.parse(req.query);
+        const posts = await postService.getPosts(query);
 
         return res.status(200).json(posts)
     }

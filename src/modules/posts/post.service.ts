@@ -1,4 +1,4 @@
-import type { CreatePostInput } from "./post.types.js";
+import type { CreatePostInput, GetPostQuerySchema } from "./post.types.js";
 import * as postRepository from "./post.repository.js";
 import { toPostResponse, toPostListResponse } from "./post.mapper.js";
 
@@ -19,8 +19,15 @@ export const createPost = async (
 }
 
 
-export const getPosts = async ()=>{
-    const posts = await postRepository.getPosts();
+export const getPosts = async (query: GetPostQuerySchema )=>{
+    const posts = await postRepository.getPosts(query);
 
-    return posts;
+    return {
+        success: true,
+        posts: posts.map(toPostListResponse),
+        pagination: {
+            page: query.page,
+            limit: query.limit
+        }
+    };
 }

@@ -1,6 +1,11 @@
 import { db } from "../../db/index.js";
 import { posts } from "../../db/schema/posts.js";
 import { AppError } from "../../shared/errors/app-error.js";
+import {
+    and, like, eq, asc, desc,
+    ilike
+} from "drizzle-orm";
+import type { GetPostQuerySchema } from "./post.types.js";
 
 
 export const createPost = async(
@@ -24,12 +29,49 @@ export const createPost = async(
 }
 
 
-export const getPosts = async () => {
-    const posts = await db.query.posts.findMany({
-        with: {
-            author: true
-        }
-    });
+export const getPosts = async (query: GetPostQuerySchema) => {
+    const conditions = [];
 
-    return posts;
+    if (query.search){
+        conditions.push(
+            ilike(
+                posts.title,
+                `%${query.search}%`
+            )
+        );
+    }
+    
+    if (query.authorId){
+        conditions.push(
+            eq(
+                posts.authorId,
+                query.authorId
+            )
+        );
+    }
+
+    if (query.published !== undefined) {
+        conditions.push(
+            eq(
+                posts.published,
+                query.published
+            )
+        )
+    }
+
+    
+
+    return db.query.posts.findMany({
+        where: conditions.length > 0 ? and(...conditions): undefined,
+        with: {author: true},
+        limit: query.limit,
+        offset: (query.page-1)*query.limit,
+        orderBy: query.order == "asc" ? asc(
+            posts[
+                query.sortBy
+            ]
+        ): desc(
+            posts[query.sortBy]
+        ),
+    })
 }
