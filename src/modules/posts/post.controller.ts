@@ -3,7 +3,7 @@ import { getAuthenticatedUser } from "../../shared/utils/auth.js";
 import * as postService from "./post.service.js";
 import { asyncHandler } from "../../shared/utils/async-handler.js";
 import type { GetPostQuerySchema } from "./post.types.js";
-import { getPostQuerySchema } from "./post.validation.js";
+import { getPostQuerySchema, postIdSchema } from "./post.validation.js";
  
 
 
@@ -30,5 +30,22 @@ export const getPosts = asyncHandler (
         const posts = await postService.getPosts(query);
 
         return res.status(200).json(posts)
+    }
+)
+
+export const getPostById = asyncHandler (
+    async (
+        req: Request,
+        res: Response
+    ) => {
+        const params = postIdSchema.parse(req.params);
+
+        const response = await postService.getPostById(params.id);
+
+
+        return res.status(200).json({
+            response
+        })
+
     }
 )

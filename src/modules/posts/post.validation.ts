@@ -25,4 +25,8 @@ export const getPostQuerySchema = z.object({
         "asc",
         "desc"
     ]).default("desc")
-})
+}).strict();
+
+export const postIdSchema = z.object({
+    id: z.coerce.number().int().positive(),
+}).strict();

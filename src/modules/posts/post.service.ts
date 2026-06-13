@@ -1,6 +1,7 @@
 import type { CreatePostInput, GetPostQuerySchema } from "./post.types.js";
 import * as postRepository from "./post.repository.js";
 import { toPostResponse, toPostListResponse } from "./post.mapper.js";
+import { AppError } from "../../shared/errors/app-error.js";
 
 export const createPost = async (
     data: CreatePostInput,
@@ -29,5 +30,23 @@ export const getPosts = async (query: GetPostQuerySchema )=>{
             page: query.page,
             limit: query.limit
         }
+    };
+}
+
+export const getPostById = async (
+    id:number
+) => {
+    const post = await postRepository.getPostById(id);
+
+    if(!post) {
+        throw new AppError(
+            "Post not found",
+            422
+        )
+    };
+
+    return {
+        success: true,
+        post: toPostResponse(post)
     };
 }

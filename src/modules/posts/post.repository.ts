@@ -75,3 +75,14 @@ export const getPosts = async (query: GetPostQuerySchema) => {
         ),
     })
 }
+
+
+
+export const getPostById = async (id: number) => {
+    return await db.query.posts.findFirst({
+        where: eq(posts.id, id),
+        with: {
+            author: true
+        }
+    })
+}
