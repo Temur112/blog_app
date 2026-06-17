@@ -5,7 +5,7 @@ import {
     and, like, eq, asc, desc,
     ilike
 } from "drizzle-orm";
-import type { GetPostQuerySchema } from "./post.types.js";
+import type { GetPostQuerySchema, UpdatePostInput } from "./post.types.js";
 
 
 export const createPost = async(
@@ -85,4 +85,32 @@ export const getPostById = async (id: number) => {
             author: true
         }
     })
+}
+
+export const updatePost = async (
+    id: number,
+    data: UpdatePostInput
+) => {
+
+    const values = Object.fromEntries(
+        Object.entries(data).filter(
+            (_, value) => value !== undefined
+        )
+    )
+    const result = await db.update(posts).set(
+        {
+            ...values,
+            updatedAt: new Date()
+        }
+    ).where(eq(posts.id, id)).returning()
+
+    return result[0];
+}
+
+export const deletePost = async (
+    id: number
+) => {
+    const result = await db.delete(posts).where(eq(posts.id, id)).returning();
+
+    return result[0];
 }

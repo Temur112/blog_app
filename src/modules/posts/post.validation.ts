@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { boolean, z } from "zod";
 
 export const createPostSchema = z.object(
     {
@@ -30,3 +30,15 @@ export const getPostQuerySchema = z.object({
 export const postIdSchema = z.object({
     id: z.coerce.number().int().positive(),
 }).strict();
+
+
+export const postUpdateSchema = z.object({
+    title: z.string().min(3).max(255).optional(),
+    content: z.string().min(1).optional(),
+    published: boolean().optional()
+}).strict().refine(
+    data=> Object.keys(data).length > 0,
+    {
+        message: "At least one field must be provided"
+    }
+);

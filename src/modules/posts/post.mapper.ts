@@ -22,6 +22,6 @@ export const toPostListResponse = (
 
     author: {
         id: post.author.id,
-        ussername: post.author.username
+        username: post.author.username
     }
 })

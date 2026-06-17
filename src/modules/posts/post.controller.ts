@@ -3,7 +3,7 @@ import { getAuthenticatedUser } from "../../shared/utils/auth.js";
 import * as postService from "./post.service.js";
 import { asyncHandler } from "../../shared/utils/async-handler.js";
 import type { GetPostQuerySchema } from "./post.types.js";
-import { getPostQuerySchema, postIdSchema } from "./post.validation.js";
+import { getPostQuerySchema, postIdSchema, postUpdateSchema } from "./post.validation.js";
  
 
 
@@ -43,9 +43,40 @@ export const getPostById = asyncHandler (
         const response = await postService.getPostById(params.id);
 
 
-        return res.status(200).json({
+        return res.status(200).json(
             response
-        })
+        )
 
+    }
+)
+
+
+export const updatePost = asyncHandler (
+    async (
+        req: Request,
+        res: Response,
+    ) => {
+        const user = getAuthenticatedUser(req);
+
+        const params = postIdSchema.parse(req.params);
+        const response = await postService.updatePost(params.id, req.body, user.id);
+
+
+        return res.status(200).json(response)
+    }
+)
+
+export const deletePost = asyncHandler(
+    async (
+        req: Request,
+        res: Response
+    ) => {
+        const user = getAuthenticatedUser(req);
+        const params = postIdSchema.parse(req.params);
+
+        const response =  await postService.deletePost(params.id, user.id)
+
+
+        return res.status(200).json(response);
     }
 )

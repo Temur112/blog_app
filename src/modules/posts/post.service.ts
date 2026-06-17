@@ -1,4 +1,4 @@
-import type { CreatePostInput, GetPostQuerySchema } from "./post.types.js";
+import type { CreatePostInput, GetPostQuerySchema, UpdatePostInput } from "./post.types.js";
 import * as postRepository from "./post.repository.js";
 import { toPostResponse, toPostListResponse } from "./post.mapper.js";
 import { AppError } from "../../shared/errors/app-error.js";
@@ -41,7 +41,7 @@ export const getPostById = async (
     if(!post) {
         throw new AppError(
             "Post not found",
-            422
+            404
         )
     };
 
@@ -49,4 +49,73 @@ export const getPostById = async (
         success: true,
         post: toPostResponse(post)
     };
+}
+
+
+export const updatePost = async (
+    id: number,
+    data: UpdatePostInput,
+    userId: number
+) => {
+    const existingPost = await postRepository.getPostById(id);
+
+
+    if (!existingPost) {
+        throw new AppError(
+            "Post Not found",
+            404
+        )
+    }
+
+    if (existingPost.author.id !== userId) {
+        throw new AppError(
+            "Forbidden",
+            403
+        )
+    }
+
+
+    const updatedPost = await postRepository.updatePost(id, data);
+
+    if (!updatedPost) {
+        throw new AppError(
+            "Failed to update",
+            500
+        );
+    }
+
+    return {
+        success: true,
+        post: toPostResponse(updatedPost)
+    };
+}
+
+
+export const deletePost = async (
+    id: number,
+    userId: number
+) => {
+    const post = await postRepository.getPostById(id);
+
+    if(!post){
+        throw new AppError(
+            "Post not found",
+            404
+        )
+    }
+
+    if (post.author.id !== userId ) {
+        throw new AppError(
+            "Forbidden",
+            403
+        )
+    }
+
+
+    await postRepository.deletePost(id);
+
+    return {
+        success: true,
+        message: "Post deleted successfully"
+    }
 }
