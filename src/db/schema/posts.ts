@@ -10,6 +10,7 @@ import {
 
 import { relations } from "drizzle-orm";
 import { users } from "./users.js";
+import { postTags } from "./tags.js";
 
 
 export const posts = pgTable("posts", {
@@ -32,11 +33,13 @@ export const posts = pgTable("posts", {
 
 export const postsRelations = relations(
     posts,
-    ({ one }) => ({
+    ({ one, many }) => ({
         author: one(users, {
             fields: [posts.authorId],
             references: [users.id],
-        })
+        }),
+
+        postTags: many(postTags)
     })
 )
 
