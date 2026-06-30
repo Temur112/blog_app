@@ -8,6 +8,7 @@ import {
     postIdSchema,
     postUpdateSchema
 } from "./post.validation.js";
+import likeRoutes from "../likes/like.routes.js";
 
 
 const router = Router();
@@ -19,5 +20,7 @@ router.get('/:id', validateParams(postIdSchema), postController.getPostById);
 router.patch('/:id', authenticate, validateParams(postIdSchema), validateBody(postUpdateSchema), postController.updatePost);
 router.delete('/:id', authenticate, validateParams(postIdSchema), postController.deletePost)
 
+
+router.use('/:postId', likeRoutes);
 
 export default router;

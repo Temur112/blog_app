@@ -8,6 +8,7 @@ import {
 
 import { relations } from "drizzle-orm";
 import { posts } from "./posts.js";
+import { likes } from "./likes.js";
 
 export const users = pgTable("users", {
     id: serial("id").primaryKey(),
@@ -36,6 +37,7 @@ export const users = pgTable("users", {
 export const usersRelations = relations(
     users,
     ({ many }) => ({
-        posts: many(posts)
+        posts: many(posts),
+        likes: many(likes)
     })
 )

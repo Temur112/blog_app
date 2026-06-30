@@ -9,6 +9,7 @@ import { errorHandler } from './shared/middleware/error.middleware.js';
 //import routes
 import authRoutes from './modules/auth/auth.routes.js';
 import postRoutes from './modules/posts/post.routes.js';
+import tagRoutes from './modules/tags/tag.routes.js';
 
 
 
@@ -34,6 +35,7 @@ app.get("/", (req, res) => {
 // register routurs
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/tags', tagRoutes);
 
 
 // Global error handler

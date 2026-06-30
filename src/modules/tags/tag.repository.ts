@@ -4,7 +4,7 @@ import { tags } from "../../db/schema/tags.js";
 import { AppError } from "../../shared/errors/app-error.js";
 import type { GetTagSchema } from "./tag.types.js";
 
-export const CreateTag = async (
+export const createTag = async (
     name: string,
     slug: string
 ) => {
@@ -57,10 +57,35 @@ export const getTag = async (
     name: string
 ) => {
 
-    return await db.query.posts.findFirst({
+    return await db.query.tags.findFirst({
         where: eq(
             tags.name,
             name
         )
     })
+}
+
+
+export const findById = async (
+    id: number
+) => {
+    return await db.query.tags.findFirst({
+        where: eq(tags.id, id)
+    })
+}
+
+
+export const findByName = async (
+    name: string
+) => {
+    return db.query.tags.findFirst({
+        where: eq(tags.name, name)
+    })
+}
+
+
+export const deleteTag = async (
+    id: number
+) => {
+    return db.delete(tags).where(eq(tags.id, id)).returning();
 }
